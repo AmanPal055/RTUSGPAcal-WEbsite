@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SGPA Calculator</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SGPA Calculator</h1>
+        <label for="semester">Select Semester:</label>
+        <select id="semester">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+            <option value="7">Semester 7</option>
+            <option value="8">Semester 8</option>
+        </select>
+        <br><br>
+        <label for="branch">Select Branch:</label>
+        <select id="branch">
+            <option value="branch1">Ai and Ds</option>
+            <option value="branch2">CSE</option>
+            <option value="branch2">ECE</option>
+            <option value="branch2">IT</option>
+            <option value="branch2">Mechanical</option>
+            <option value="branch2">civil</option>
+            <!-- Add more branch options as needed -->
+        </select>
+        <br><br>
+        <div id="subjectInputs"></div>
+        <button onclick="calculateSGPA()">Calculate SGPA</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const subjectsByBranch = {
+            branch1: {
+                1: [
+                    { name: 'Engg. Mathematics-1', creditPoints: 4 },
+                    { name: 'Engg. Physics', creditPoints: 4 },
+                    { name: 'comm. skills', creditPoints: 2 },
+                    { name: 'PPS', creditPoints: 2 },
+                    { name: 'BEE', creditPoints: 2 },
+                    { name: 'Engg. physics lab', creditPoints: 1},
+                    { name: 'Language lab', creditPoints: 1 },
+                    { name: 'computer programming lab', creditPoints: 1.5},
+                    { name: 'BEE lab', creditPoints: 1 },
+                    { name: 'CAEG', creditPoints: 1.5 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                2: [
+                    { name: 'Engg. Mathematics-2', creditPoints: 4 },
+                    { name: 'Engg. chemistry', creditPoints: 4 },
+                    { name: 'Human values', creditPoints: 2 },
+                    { name: 'BME', creditPoints: 2 },
+                    { name: 'BCE', creditPoints: 2 },
+                    { name: 'Engg. chemistry lab', creditPoints: 1},
+                    { name: 'Human values lab', creditPoints: 1 },
+                    { name: 'Mech. workshop', creditPoints: 1.5 },
+                    { name: 'BCE lab', creditPoints: 1.5},
+                    { name: 'CAEG lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                3: [
+                    { name: 'Technical Communication', creditPoints: 3 },
+                    { name: 'AEM', creditPoints: 4 },
+                    { name: 'DE', creditPoints: 2 },
+                    { name: 'DSA', creditPoints: 3 },
+                    { name: 'OOP', creditPoints: 3 },
+                    { name: 'SE', creditPoints: 4 },
+                    { name: 'DSA lab', creditPoints: 1},
+                    { name: 'OOP lab', creditPoints: 1 },
+                    { name: 'SE lab', creditPoints: 1.5 },
+                    { name: 'DE lab', creditPoints: 1.5},
+                    { name: 'industrial training', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                4: [
+                    { name: 'DMS', creditPoints: 3 },
+                    { name: 'MEFA', creditPoints: 2 },
+                    { name: 'MPI', creditPoints: 3 },
+                    { name: 'DBMS', creditPoints: 3 },
+                    { name: 'TOC', creditPoints: 3 },
+                    { name: 'DCCN', creditPoints: 3 },
+                    { name: 'MPI lab', creditPoints: 1},
+                    { name: 'DBMS lab', creditPoints: 1.5 },
+                    { name: 'NP lab', creditPoints: 1.5 },
+                    { name: 'LSP lab', creditPoints: 1},
+                    { name: 'Java lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                5: [
+                    { name: 'Data mining', creditPoints: 2 },
+                    { name: 'CD', creditPoints: 3 },
+                    { name: 'OS', creditPoints: 3 },
+                    { name: 'CGM', creditPoints: 3 },
+                    { name: 'AOA', creditPoints: 3 },
+                    { name: 'fundamentals of bc', creditPoints: 2},
+                    { name: 'CGM Lab', creditPoints: 1 },
+                    { name: 'CD Lab', creditPoints: 1 },
+                    { name: 'AOA lab', creditPoints: 1 },
+                    { name: 'Advance java lab', creditPoints: 1 },
+                    { name: 'industrial training', creditPoints: 2.5 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                6: [
+                    { name: 'DIP', creditPoints: 2 },
+                    { name: 'ML', creditPoints: 3},
+                    { name: 'ISS', creditPoints: 2 },
+                    { name: 'CAO', creditPoints: 3 },
+                    { name: 'AI', creditPoints: 2 },
+                    { name: 'cloud computing', creditPoints: 3 },
+                    { name: 'PEC', creditPoints: 2 },
+                    { name: 'DIP Lab', creditPoints: 1.5 },
+                    { name: 'ML lab', creditPoints: 1.5 },
+                    { name: 'python lab', creditPoints: 1.5 },
+                    { name: 'Mobile app dev. lab', creditPoints: 1.5 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                7: [
+                    { name: 'Big data analytics', creditPoints: 3 },
+                    { name: 'Open Elective-1', creditPoints: 4 },
+                    { name: 'Big data lab', creditPoints: 2 },
+                    { name: 'R progg. lab', creditPoints: 3 },
+                    { name: 'Seminar', creditPoints: 3 },
+                    { name: 'SODECA', creditPoints: 4 }
+                ],
+                8: [
+                    { name: 'Deep learning', creditPoints: 3 },
+                    { name: 'Open elective-2', creditPoints: 3 },
+                    { name: 'deep learning lab', creditPoints: 1 },
+                    { name: 'robot programming', creditPoints: 1 },
+                    { name: 'Project', creditPoints: 7},
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                // Add subjects for other semesters in branch1
+            },
+            branch2: {
+                1: [
+                    { name: 'Engg. Mathematics-1', creditPoints: 4 },
+                    { name: 'Engg. Physics', creditPoints: 4 },
+                    { name: 'comm. skills', creditPoints: 2 },
+                    { name: 'PPS', creditPoints: 2 },
+                    { name: 'BEE', creditPoints: 2 },
+                    { name: 'Engg. physics lab', creditPoints: 1},
+                    { name: 'Language lab', creditPoints: 1 },
+                    { name: 'computer programming lab', creditPoints: 1.5},
+                    { name: 'BEE lab', creditPoints: 1 },
+                    { name: 'CAEG', creditPoints: 1.5 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                2: [
+                    { name: 'Engg. Mathematics-2', creditPoints: 4 },
+                    { name: 'Engg. chemistry', creditPoints: 4 },
+                    { name: 'Human values', creditPoints: 2 },
+                    { name: 'BME', creditPoints: 2 },
+                    { name: 'BCE', creditPoints: 2 },
+                    { name: 'Engg. chemistry lab', creditPoints: 1},
+                    { name: 'Human values lab', creditPoints: 1 },
+                    { name: 'Mech. workshop', creditPoints: 1.5 },
+                    { name: 'BCE lab', creditPoints: 1.5},
+                    { name: 'CAEG lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                3: [
+                    { name: 'Technical Communication', creditPoints: 3 },
+                    { name: 'AEM', creditPoints: 4 },
+                    { name: 'DE', creditPoints: 2 },
+                    { name: 'DSA', creditPoints: 3 },
+                    { name: 'OOP', creditPoints: 3 },
+                    { name: 'SE', creditPoints: 4 },
+                    { name: 'DSA lab', creditPoints: 1},
+                    { name: 'OOP lab', creditPoints: 1 },
+                    { name: 'SE lab', creditPoints: 1.5 },
+                    { name: 'DE lab', creditPoints: 1.5},
+                    { name: 'industrial training', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                4: [
+                    { name: 'DMS', creditPoints: 3 },
+                    { name: 'MEFA', creditPoints: 2 },
+                    { name: 'MPI', creditPoints: 3 },
+                    { name: 'DBMS', creditPoints: 3 },
+                    { name: 'TOC', creditPoints: 3 },
+                    { name: 'DCCN', creditPoints: 3 },
+                    { name: 'MPI lab', creditPoints: 1},
+                    { name: 'DBMS lab', creditPoints: 1.5 },
+                    { name: 'NP lab', creditPoints: 1.5 },
+                    { name: 'LSP lab', creditPoints: 1},
+                    { name: 'Java lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                5: [
+                    { name: 'IT and coding', creditPoints: 2 },
+                    { name: 'CD', creditPoints: 3 },
+                    { name: 'OS', creditPoints: 3 },
+                    { name: 'CGM', creditPoints: 3 },
+                    { name: 'AOA', creditPoints: 3 },
+                    { name: 'PCC/PEC', creditPoints: 2},
+                    { name: 'CGM Lab', creditPoints: 1 },
+                    { name: 'CD Lab', creditPoints: 1 },
+                    { name: 'AOA lab', creditPoints: 1 },
+                    { name: 'Advance java lab', creditPoints: 1 },
+                    { name: 'industrial training', creditPoints: 2.5 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                6: [
+                    { name: 'DIP', creditPoints: 2 },
+                    { name: 'ML', creditPoints: 3},
+                    { name: 'ISS', creditPoints: 2 },
+                    { name: 'CAO', creditPoints: 3 },
+                    { name: 'AI', creditPoints: 2 },
+                    { name: 'cloud computing', creditPoints: 3 },
+                    { name: 'PEC', creditPoints: 2 },
+                    { name: 'DIP Lab', creditPoints: 1.5 },
+                    { name: 'ML lab', creditPoints: 1.5 },
+                    { name: 'python lab', creditPoints: 1.5 },
+                    { name: 'Mobile app dev. lab', creditPoints: 1.5 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                7: [
+                    { name: 'IOT', creditPoints: 3 },
+                    { name: 'Open Elective-1', creditPoints: 3 },
+                    { name: 'IOT lab', creditPoints: 2 },
+                    { name: 'Cyber security', creditPoints: 2 },
+                    { name: 'industrial training', creditPoints: 2.5 },
+                    { name: 'Seminar', creditPoints: 2},
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                8: [
+                    { name: 'Big data anlytics', creditPoints: 3 },
+                    { name: 'Open elective-2', creditPoints: 3 },
+                    { name: 'Big data anlytics lab', creditPoints: 1 },
+                    { name: 'STV lab', creditPoints: 1 },
+                    { name: 'Project', creditPoints: 7},
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                // Add subjects for other semesters in branch2
+            },
+            branch3: {
+                1: [
+                    { name: 'Engg. Mathematics-1', creditPoints: 4 },
+                    { name: 'Engg. Physics', creditPoints: 4 },
+                    { name: 'comm. skills', creditPoints: 2 },
+                    { name: 'PPS', creditPoints: 2 },
+                    { name: 'BEE', creditPoints: 2 },
+                    { name: 'Engg. physics lab', creditPoints: 1},
+                    { name: 'Language lab', creditPoints: 1 },
+                    { name: 'computer programming lab', creditPoints: 1.5},
+                    { name: 'BEE lab', creditPoints: 1 },
+                    { name: 'CAEG', creditPoints: 1.5 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                2: [
+                    { name: 'Engg. Mathematics-2', creditPoints: 4 },
+                    { name: 'Engg. chemistry', creditPoints: 4 },
+                    { name: 'Human values', creditPoints: 2 },
+                    { name: 'BME', creditPoints: 2 },
+                    { name: 'BCE', creditPoints: 2 },
+                    { name: 'Engg. chemistry lab', creditPoints: 1},
+                    { name: 'Human values lab', creditPoints: 1 },
+                    { name: 'Mech. workshop', creditPoints: 1.5 },
+                    { name: 'BCE lab', creditPoints: 1.5},
+                    { name: 'CAEG lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                3: [
+                    { name: 'Technical comm', creditPoints: 3 },
+                    { name: 'AEM', creditPoints: 4 },
+                    { name: 'DE', creditPoints: 2 },
+                    { name: 'DSA', creditPoints: 3 },
+                    { name: 'OOP', creditPoints: 3 },
+                    { name: 'SE', creditPoints: 4 },
+                    { name: 'DSA lab', creditPoints: 1},
+                    { name: 'OOP lab', creditPoints: 1 },
+                    { name: 'SE lab', creditPoints: 1.5 },
+                    { name: 'DE lab', creditPoints: 1.5},
+                    { name: 'industrial training', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                4: [
+                    { name: 'DMS', creditPoints: 3 },
+                    { name: 'MEFA', creditPoints: 2 },
+                    { name: 'MPI', creditPoints: 3 },
+                    { name: 'DBMS', creditPoints: 3 },
+                    { name: 'TOC', creditPoints: 3 },
+                    { name: 'DCCN', creditPoints: 3 },
+                    { name: 'MPI lab', creditPoints: 1},
+                    { name: 'DBMS lab', creditPoints: 1.5 },
+                    { name: 'NP lab', creditPoints: 1.5 },
+                    { name: 'LSP lab', creditPoints: 1},
+                    { name: 'Java lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 },
+                ],
+                5: [
+                    { name: 'Computer Architecture', creditPoints: 2 },
+                    { name: 'ElectoMagnetic waves', creditPoints: 3 },
+                    { name: 'Control system', creditPoints: 3 },
+                    { name: 'Digital signal processing', creditPoints: 3 },
+                    { name: 'Microwave theory and technique', creditPoints: 3 },
+                    { name: 'PEC', creditPoints: 2},
+                    { name: 'RF simulation Lab', creditPoints: 1.5 },
+                    { name: 'DSP Lab', creditPoints: 1.5 },
+                    { name: 'Microwave lab', creditPoints: 1 },
+                    { name: 'industrial training', creditPoints: 2.5 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                6: [
+                    { name: 'Power Electronics', creditPoints: 2 },
+                    { name: 'Computer Network', creditPoints: 3},
+                    { name: 'Fiber Optics', creditPoints: 2 },
+                    { name: 'Antennas and Propagation', creditPoints: 3 },
+                    { name: 'AI', creditPoints: 2 },
+                    { name: '5G Communication', creditPoints: 3 },
+                    { name: 'PEC', creditPoints: 3 },
+                    { name: 'CN Lab', creditPoints: 2 },
+                    { name: 'AWP lab', creditPoints: 1 },
+                    { name: 'ED lab', creditPoints: 2 },
+                    { name: 'PE lab', creditPoints: 1 },
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                7: [
+                    { name: 'Big data analytics', creditPoints: 3 },
+                    { name: 'Open Elective-1', creditPoints: 4 },
+                    { name: 'Big data lab', creditPoints: 2 },
+                    { name: 'R progg. lab', creditPoints: 3 },
+                    { name: 'Seminar', creditPoints: 3 },
+                    { name: 'SODECA', creditPoints: 4 }
+                ],
+                8: [
+                    { name: 'Deep learning', creditPoints: 3 },
+                    { name: 'Open elective-2', creditPoints: 3 },
+                    { name: 'deep learning lab', creditPoints: 1 },
+                    { name: 'robot programming', creditPoints: 1 },
+                    { name: 'Project', creditPoints: 7},
+                    { name: 'SODECA', creditPoints: 0.5 }
+                ],
+                // Add subjects for other semesters in branch1
+            },
+            // Add subjects for other branches as needed
+        };
+
+        const gradeOptions = {
+            'A++':10,
+            'A+': 9.0,
+            'A': 8.5,
+            'B+': 8.0,
+            'B': 7.5,
+            'C+': 7.0,
+            'C': 6.5,
+            'D+': 6.0,
+            'D': 5.5,
+            'E+': 5.0,
+            'E': 4.0
+        };
+
+        function populateSubjects() {
+            const semester = document.getElementById('semester').value;
+            const branch = document.getElementById('branch').value;
+            const subjects = subjectsByBranch[branch][semester];
+
+            const subjectInputs = document.getElementById('subjectInputs');
+            subjectInputs.innerHTML = '';
+
+            subjects.forEach((subject, index) => {
+                const label = document.createElement('label');
+                label.textContent = `${subject.name} Grade:`;
+                const select = document.createElement('select');
+                select.className = 'grade-select';
+                select.id = `subject${index + 1}`;
+
+                for (const grade in gradeOptions) {
+                    const option = document.createElement('option');
+                    option.value = grade;
+                    option.textContent = grade;
+                    select.appendChild(option);
+                }
+
+                subjectInputs.appendChild(label);
+                subjectInputs.appendChild(select);
+                subjectInputs.appendChild(document.createElement('br'));
+            });
+        }
+
+        function calculateSGPA() {
+            const grades = [];
+
+            const gradeSelects = document.querySelectorAll('.grade-select');
+            gradeSelects.forEach((select) => {
+                grades.push(select.value);
+            });
+
+            const semester = document.getElementById('semester').value;
+            const branch = document.getElementById('branch').value;
+            const subjects = subjectsByBranch[branch][semester];
+
+            let totalScore = 0;
+            let totalCreditPoints = 0;
+
+            for (let i = 0; i < grades.length; i++) {
+                const grade = grades[i];
+                const creditPoint = subjects[i].creditPoints;
+                totalScore += (gradeOptions[grade] * creditPoint);
+                totalCreditPoints += creditPoint;
+            }
+
+            const sgpa = (totalScore / totalCreditPoints).toFixed(2);
+
+            document.getElementById('result').innerHTML = `Your SGPA is: ${sgpa}`;
+        }
+
+        // Populate subjects based on the selected semester and branch
+        document.getElementById('semester').addEventListener('change', populateSubjects);
+        document.getElementById('branch').addEventListener('change', populateSubjects);
+
+        // Initially populate subjects for the default semester and branch
+        populateSubjects();
+    </script>
+</body>
+</html>
